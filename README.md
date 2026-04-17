@@ -8,7 +8,7 @@
 - Configurable list of timezones.
 - Highlighting support:
   - **Green**: Your current timezone.
-  - **Yellow/Orange**: Important timezones.
+  - **Yellow**: Important timezones (standard 16-color ANSI so basic terminals render it correctly).
 - Simple, dependency-free (standard C and POSIX).
 
 ## Prerequisites

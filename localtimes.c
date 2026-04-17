@@ -20,8 +20,9 @@ color_type_t get_color_type(const char *zone, const char *current_zone, const ch
 
 void format_time_string(char *buf, size_t size, const struct tm *tm) {
     char *weekday[] = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
-    char *dst[] = { "", "*" };
-    snprintf(buf, size, "%04d/%02d/%02d (%s) %02d:%02d:%02d %s",
+    const char *dst = (tm->tm_isdst > 0) ? " *" : "";
+
+    snprintf(buf, size, "%04d/%02d/%02d (%s) %02d:%02d:%02d%s",
             tm->tm_year + 1900,
             tm->tm_mon + 1,
             tm->tm_mday,
@@ -29,7 +30,7 @@ void format_time_string(char *buf, size_t size, const struct tm *tm) {
             tm->tm_hour,
             tm->tm_min,
             tm->tm_sec,
-            dst[tm->tm_isdst]);
+            dst);
 }
 
 #ifndef TEST_MODE
@@ -57,7 +58,8 @@ int main(int argc, char **argv) {
         if (color == COLOR_CURRENT) {
             printf("%c[%d;%d;%dm", 0x1B, 1, 32, 40);
         } else if (color == COLOR_IMPORTANT) {
-            printf("%c[%d;%d;%dm", 0x1B, 38, 5, 227);
+            /* bold yellow on black — SGR 16-color, not 256-color */
+            printf("%c[%d;%d;%dm", 0x1B, 1, 33, 40);
         }
 
         format_time_string(time_buf, sizeof(time_buf), &tm);

@@ -1,6 +1,7 @@
 #ifndef LOCALTIMES_H
 #define LOCALTIMES_H
 
+#include <stddef.h>
 #include <time.h>
 
 typedef enum {

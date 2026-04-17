@@ -29,9 +29,7 @@ void test_format_time_string() {
 
     char buf[128];
     format_time_string(buf, sizeof(buf), &tm);
-    // Note: format_time_string uses "%... %s" which adds a space before DST marker.
-    // If DST is 0, it appends "" so there is a trailing space.
-    assert(strcmp(buf, "2026/04/17 (Fri) 10:30:15 ") == 0);
+    assert(strcmp(buf, "2026/04/17 (Fri) 10:30:15") == 0);
 
     tm.tm_isdst = 1;
     format_time_string(buf, sizeof(buf), &tm);
