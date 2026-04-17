@@ -85,4 +85,3 @@ jobs:
               --title "${TAG}" \
               --notes "Automated release for ${TAG}"
           fi
-``
