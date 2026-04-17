@@ -36,7 +36,7 @@ jobs:
           echo "raw=$raw"
 
           # 最初に見つかった x.y.z 形式を拾う（必要に応じて正規表現は調整）
-          version="$(echo "$raw" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+' | head -n1 || true)"
+          version="$(echo "$raw" | head -n1 || true)"
 
           if [[ -z "${version}" ]]; then
             echo "Could not parse version from: $raw" >&2
