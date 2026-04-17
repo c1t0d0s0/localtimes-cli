@@ -5,7 +5,12 @@ INCLUDE=-I.
 PREFIX=$(HOME)
 BINDIR=$(PREFIX)/bin
 
+.PHONY: all strip clean install test
+
 all: localtimes
+
+strip: localtimes
+	strip localtimes
 
 clean::
 	rm -f *.o localtimes zones.inc test_localtimes
