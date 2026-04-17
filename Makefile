@@ -8,11 +8,17 @@ BINDIR=$(PREFIX)/bin
 all: localtimes
 
 clean::
-	rm -f *.o localtimes zones.inc
+	rm -f *.o localtimes zones.inc test_localtimes
 
 install: localtimes
 	mkdir -p $(BINDIR)
 	cp localtimes $(BINDIR)/localtimes
+
+test: test_localtimes
+	./test_localtimes
+
+test_localtimes: test_localtimes.c localtimes.c localtimes.h zones.inc
+	${CC} ${CFLAGS} ${INCLUDE} -o test_localtimes test_localtimes.c
 
 localtimes: localtimes.o
 	${CC} ${CFLAGS} -o localtimes localtimes.o

@@ -1,0 +1,88 @@
+name: Build and Release (main push)
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write  # タグpush/Release作成/アセットuploadに必要
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # タグ操作するので深さ0推奨
+
+      - name: Build (make)
+        run: |
+          make
+          ls -la
+          test -f ./localtimes
+
+      - name: Get version from binary
+        id: ver
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x ./localtimes || true
+
+          # 例: "localtimes version 1.2.3" や "1.2.3" 等、出力形式差に強くする
+          raw="$(./localtimes --version | head -n1 | tr -d '\r')"
+          echo "raw=$raw"
+
+          # 最初に見つかった x.y.z 形式を拾う（必要に応じて正規表現は調整）
+          version="$(echo "$raw" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+' | head -n1 || true)"
+
+          if [[ -z "${version}" ]]; then
+            echo "Could not parse version from: $raw" >&2
+            exit 1
+          fi
+
+          tag="v${version}"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+
+      - name: Create & push tag (if not exists)
+        env:
+          TAG: ${{ steps.ver.outputs.tag }}
+        run: |
+          set -euo pipefail
+          # 既に同名タグがあるならスキップ（同じバージョンを何度も release しない）
+          if git rev-parse -q --verify "refs/tags/${TAG}" >/dev/null; then
+            echo "Tag ${TAG} already exists. Skip tagging."
+            exit 0
+          fi
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git tag -a "${TAG}" -m "Release ${TAG}"
+          git push origin "${TAG}"
+
+      - name: Create GitHub Release (if not exists) and upload asset
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.ver.outputs.tag }}
+          VERSION: ${{ steps.ver.outputs.version }}
+        run: |
+          set -euo pipefail
+
+          asset_name="localtimes_${VERSION}_linux_amd64"
+          cp ./localtimes "./${asset_name}"
+
+          # 既にReleaseがある場合は upload のみにする
+          if gh release view "${TAG}" >/dev/null 2>&1; then
+            echo "Release ${TAG} already exists. Upload asset only."
+            gh release upload "${TAG}" "./${asset_name}" --clobber
+          else
+            echo "Create release ${TAG} and upload asset."
+            gh release create "${TAG}" "./${asset_name}" \
+              --title "${TAG}" \
+              --notes "Automated release for ${TAG}"
+          fi
+``
