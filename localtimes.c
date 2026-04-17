@@ -13,7 +13,7 @@ int main(int argc, char **argv) {
 	int		i;
 
 	if (argc > 1 && strcmp(argv[1], "--version") == 0) {
-		printf("localtimes version: %s\n", VERSION_STRING);
+		printf("%s\n", VERSION_STRING);
 		return 0;
 	}
 
